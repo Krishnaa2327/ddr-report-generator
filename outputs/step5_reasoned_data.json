@@ -1,0 +1,93 @@
+[
+  {
+    "area": "Hall",
+    "probable_root_cause": "Water seepage from bathroom above through open tile joints",
+    "severity": "Medium",
+    "severity_reasoning": "Active dampness at skirting level indicates ongoing water ingress but no structural damage observed",
+    "recommended_actions": [
+      "Re-grout tile joints in the Common Bathroom above",
+      "Inspect and repair any plumbing issues in the bathroom above",
+      "Apply waterproofing coat at skirting level in Hall",
+      "Monitor for recurrence after repairs"
+    ],
+    "urgency": "Within 1 Month"
+  },
+  {
+    "area": "Common Bathroom",
+    "probable_root_cause": "Plumbing issues leading to water leakage and gaps between tile joints",
+    "severity": "Medium",
+    "severity_reasoning": "Presence of ceiling dampness and tile hollowness suggests ongoing moisture issues that need addressing",
+    "recommended_actions": [
+      "Inspect and repair plumbing fixtures to eliminate leaks",
+      "Re-grout gaps between tile joints to prevent further water ingress",
+      "Assess and repair any ceiling damage due to dampness",
+      "Monitor for recurrence after repairs"
+    ],
+    "urgency": "Immediate"
+  },
+  {
+    "area": "Bedroom",
+    "probable_root_cause": "Water ingress from adjacent areas or plumbing issues causing wall dampness",
+    "severity": "Medium",
+    "severity_reasoning": "Presence of multiple dampness indicators suggests ongoing moisture issues that could lead to further damage",
+    "recommended_actions": [
+      "Inspect plumbing in adjacent areas for leaks",
+      "Re-grout gaps between tile joints to prevent further water ingress",
+      "Apply a damp-proofing treatment to affected walls",
+      "Monitor for recurrence after repairs"
+    ],
+    "urgency": "Within 1 Month"
+  },
+  {
+    "area": "Kitchen",
+    "probable_root_cause": "Water seepage from adjacent areas or plumbing issues causing skirting level dampness",
+    "severity": "Medium",
+    "severity_reasoning": "Active dampness at skirting level indicates ongoing water ingress but no structural damage observed",
+    "recommended_actions": [
+      "Inspect plumbing for leaks in the kitchen area",
+      "Apply waterproofing coat at skirting level in Kitchen",
+      "Monitor for recurrence after repairs",
+      "Check for any external drainage issues that may contribute to dampness"
+    ],
+    "urgency": "Within 1 Month"
+  },
+  {
+    "area": "External Wall",
+    "probable_root_cause": "Possible settlement or thermal expansion causing cracks in the wall",
+    "severity": "Medium",
+    "severity_reasoning": "Cracks in the external wall can indicate structural issues or moisture intrusion, but no immediate risk is noted.",
+    "recommended_actions": [
+      "Inspect cracks to determine depth and width",
+      "Seal cracks to prevent moisture ingress",
+      "Monitor for further movement or cracking",
+      "Consider consulting a structural engineer if cracks worsen"
+    ],
+    "urgency": "Within 3 Months"
+  },
+  {
+    "area": "Parking Area",
+    "probable_root_cause": "Water infiltration from surface runoff or poor drainage leading to seepage",
+    "severity": "Medium",
+    "severity_reasoning": "Seepage can lead to surface deterioration and potential safety hazards, but no immediate structural damage is reported.",
+    "recommended_actions": [
+      "Assess drainage systems for blockages or inefficiencies",
+      "Repair any visible cracks or holes in the parking surface",
+      "Implement proper drainage solutions to redirect water away",
+      "Monitor for changes in seepage patterns"
+    ],
+    "urgency": "Within 1 Month"
+  },
+  {
+    "area": "Property - General",
+    "probable_root_cause": "Not Available - insufficient data",
+    "severity": "Not Available",
+    "severity_reasoning": "Thermal images are available, but without numeric data, the assessment of severity cannot be determined.",
+    "recommended_actions": [
+      "Obtain numeric data from thermal images for further analysis",
+      "Conduct a detailed thermal inspection to identify potential issues",
+      "Review building envelope for insulation and air leakage",
+      "Schedule regular thermal imaging assessments"
+    ],
+    "urgency": "Routine Maintenance"
+  }
+]

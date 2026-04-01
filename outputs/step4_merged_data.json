@@ -1,0 +1,72 @@
+[
+  {
+    "area": "Hall",
+    "combined_observation": "Skirting level Dampness",
+    "inspection_finding": "Skirting level Dampness",
+    "thermal_finding": "Not Available",
+    "conflict": "None",
+    "data_sources": [
+      "inspection"
+    ]
+  },
+  {
+    "area": "Common Bathroom",
+    "combined_observation": "tile hollowness, plumbing issue & gaps between the tile joints, Ceiling Dampness, gap between tile joints",
+    "inspection_finding": "tile hollowness, plumbing issue & gaps between the tile joints, Ceiling Dampness, gap between tile joints",
+    "thermal_finding": "Not Available",
+    "conflict": "None",
+    "data_sources": [
+      "inspection"
+    ]
+  },
+  {
+    "area": "Bedroom",
+    "combined_observation": "Skirting level Dampness, tile hollowness, gaps between the tile joints, wall dampness",
+    "inspection_finding": "Skirting level Dampness, tile hollowness, gaps between the tile joints, wall dampness",
+    "thermal_finding": "Not Available",
+    "conflict": "None",
+    "data_sources": [
+      "inspection"
+    ]
+  },
+  {
+    "area": "Kitchen",
+    "combined_observation": "Skirting level Dampness",
+    "inspection_finding": "Skirting level Dampness",
+    "thermal_finding": "Not Available",
+    "conflict": "None",
+    "data_sources": [
+      "inspection"
+    ]
+  },
+  {
+    "area": "External Wall",
+    "combined_observation": "cracks",
+    "inspection_finding": "cracks",
+    "thermal_finding": "Not Available",
+    "conflict": "None",
+    "data_sources": [
+      "inspection"
+    ]
+  },
+  {
+    "area": "Parking Area",
+    "combined_observation": "seepage",
+    "inspection_finding": "seepage",
+    "thermal_finding": "Not Available",
+    "conflict": "None",
+    "data_sources": [
+      "inspection"
+    ]
+  },
+  {
+    "area": "Property - General",
+    "combined_observation": "Thermal images available but numeric data not extractable from text",
+    "inspection_finding": "Not Available",
+    "thermal_finding": "Thermal images available but numeric data not extractable from text",
+    "conflict": "None",
+    "data_sources": [
+      "thermal"
+    ]
+  }
+]

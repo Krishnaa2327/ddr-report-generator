@@ -1,0 +1,13 @@
+[
+  {
+    "area": "Not Available",
+    "image_id": "Not Available",
+    "hotspot": "Not Available",
+    "coldspot": "Not Available",
+    "emissivity": "Not Available",
+    "reflected_temp": "Not Available",
+    "thermal_issue": "Thermal images available but numeric data not extractable from text",
+    "date": "Not Available",
+    "data_quality": "images_only"
+  }
+]

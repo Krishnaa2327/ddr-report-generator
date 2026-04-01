@@ -1,212 +1,124 @@
 import fitz
 import os
-import re
-import json
 from pathlib import Path
 from PIL import Image
-import numpy as np
 import io
-import hashlib
 
 
 def parse_thermal_pdf(pdf_path: str, image_out: str = "outputs/extracted_images/thermal") -> dict:
     """
-    Main entry point called by main.py.
-    Returns dict with keys: full_text, page_count, images, pages, readings
+    Parse the thermal PDF by scanning all xrefs globally.
     
-    FIX 1: Filter out small images (UI elements, icons)
-    FIX 2: Detect & skip duplicate images using MD5 hashing
-    FIX 3: Keep only unique, meaningful images
+    The thermal PDF uses shared image resources — every page's get_images()
+    returns ALL images from the entire document. Instead, we scan xrefs
+    globally to find unique thermal/visual JPEG pairs, then save them in order.
+    
+    Pattern in this PDF:
+      - 1080×810 JPEG = thermal image (colorized heat map)
+      - 1080×812 JPEG = visual/normal image (regular photo)
+    They appear as consecutive xref pairs (N, N+1).
     """
     Path(image_out).mkdir(parents=True, exist_ok=True)
-
     doc = fitz.open(pdf_path)
+
     result = {
-        "full_text":  "",      # main.py uses full_text
-        "page_count": 0,       # main.py uses page_count
-        "pages":      [],
-        "images":     [],
-        "readings":   []       # main.py uses readings
+        "full_text": "",
+        "page_count": 0,
+        "pages": [],
+        "images": [],
+        "readings": []
     }
 
     full_text = ""
 
+    # ── Step 1: Collect full text from every page ──────────────────────────────
     for page_num in range(len(doc)):
         page = doc[page_num]
         page_text = page.get_text()
         full_text += f"\n--- PAGE {page_num + 1} ---\n{page_text}"
-
         result["pages"].append({
             "page_num": page_num + 1,
-            "text":     page_text
+            "text": page_text
         })
 
-        # Extract images — FIX 1 & 2 & 3: Filter by size, track hashes for deduplication
-        image_list = page.get_images(full=True)
-        page_image_hashes = set()  # Track hashes we've seen on this page
-        page_images_filtered = []
-        
-        for img_index, img in enumerate(image_list):
-            xref = img[0]
-            try:
-                base_image  = doc.extract_image(xref)
-                image_bytes = base_image["image"]
-                image_ext   = base_image["ext"]
-                
-                # FIX 1: Filter out small images (icons, UI elements)
-                try:
-                    img_pil = Image.open(io.BytesIO(image_bytes))
-                    width, height = img_pil.size
-                except Exception:
-                    width, height = 0, 0
-                
-                # Skip images smaller than 200x200
-                if width < 200 or height < 200:
-                    print(f"  [SKIP] Small image {width}x{height} on p{page_num+1} (UI element)")
-                    continue
-                
-                # FIX 2: Skip duplicate images on same page (using hash)
-                img_hash = hashlib.md5(image_bytes).hexdigest()
-                if img_hash in page_image_hashes:
-                    print(f"  [SKIP] Duplicate image {width}x{height} on p{page_num+1} (hash={img_hash[:6]})")
-                    continue
-                
-                page_image_hashes.add(img_hash)
-                
-                size = width * height
-                page_images_filtered.append({
-                    "xref": xref,
-                    "bytes": image_bytes,
-                    "ext": image_ext,
-                    "width": width,
-                    "height": height,
-                    "size": size,
-                    "index": img_index,
-                    "hash": img_hash
-                })
-            except Exception as e:
-                print(f"[WARNING] Could not process image p{page_num+1} img{img_index}: {e}")
-        
-        # FIX 3: Keep only top 2 largest unique images per page  
-        page_images_filtered = sorted(page_images_filtered, key=lambda x: x["size"], reverse=True)[:2]
-        
-        page_image_paths = []
-        for img_data in page_images_filtered:
-            try:
-                image_bytes = img_data["bytes"]
-                image_ext = img_data["ext"]
-                
-                # FIX 2: Since PDFs have duplicate/similar images, use position to differentiate
-                img_type = "thermal" if len(page_image_paths) == 0 else "visual"
-                
-                image_filename = f"thermal_p{page_num + 1}_{img_type}.{image_ext}"
-                image_path  = os.path.join(image_out, image_filename)
-
-                with open(image_path, "wb") as img_file:
-                    img_file.write(image_bytes)
-
-                result["images"].append({
-                    "page_num":    page_num + 1,
-                    "image_index": img_data["index"] + 1,
-                    "type":        img_type,
-                    "path":        image_path,
-                    "filename":    image_filename,
-                    "width":       img_data["width"],
-                    "height":      img_data["height"],
-                    "hash":        img_data["hash"][:8]  # Store hash for debugging
-                })
-                page_image_paths.append((img_type, image_path))
-
-            except Exception as e:
-                print(f"[ERROR] Failed to save image p{page_num+1}: {e}")
-
-        # Parse thermal reading for this page
-        reading = _parse_thermal_reading(page_text, page_num + 1)
-        if reading:
-            for img_type, img_path in page_image_paths:
-                if img_type == "thermal":
-                    reading["thermal_image_path"] = img_path
-                elif img_type == "visual":
-                    reading["visual_image_path"] = img_path
-
-            reading.setdefault("thermal_image_path", "Image Not Available")
-            reading.setdefault("visual_image_path",  "Image Not Available")
-            result["readings"].append(reading)
-
-    result["full_text"]  = full_text
+    result["full_text"] = full_text
     result["page_count"] = len(doc)
-    doc.close()
 
-    return result
+    # ── Step 2: Scan ALL xrefs globally to find unique large JPEG pairs ────────
+    # (Per-page get_images() returns ALL images on every page for this PDF type)
+    thermal_xrefs = []   # 1080×810 — thermal heat-map images
+    visual_xrefs  = []   # 1080×812 — regular visual photos
 
-
-def _parse_thermal_reading(page_text: str, page_num: int) -> dict | None:
-    """
-    Extracts thermal measurement data from a single page.
-    
-    FIX 4: Handle broken/garbled text extraction gracefully.
-    If numerical data is not extractable, we still mark page as having thermal data
-    so images can still be used as evidence (even without exact temperatures).
-    """
-    # FIX 4: More lenient check - allow pages with minimal indicators
-    has_thermal_content = (
-        "hotspot" in page_text.lower() or
-        "thermal" in page_text.lower() or
-        "temperature" in page_text.lower() or
-        "°c" in page_text.lower() or
-        "°C" in page_text.lower()
-    )
-    
-    if not has_thermal_content:
-        return None
-
-    reading = {
-        "page_num":       page_num,
-        "image_id":       "Not Available",
-        "hotspot":        "Not Available",
-        "coldspot":       "Not Available",
-        "emissivity":     "Not Available",
-        "reflected_temp": "Not Available",
-        "date":           "Not Available",
-        "device":         "Not Available",
-        "serial_number":  "Not Available",
-        "thermal_image_path": "Image Not Available",
-        "visual_image_path":  "Image Not Available",
-        "data_quality":   "partial"  # FIX 4: Track data quality
-    }
-
-    patterns = {
-        "image_id":       r'Thermal image\s*:\s*([A-Z0-9]+\.JPG)',
-        "hotspot":        r'Hotspot\s*:\s*([\d.]+\s*°C)',
-        "coldspot":       r'Coldspot\s*:\s*([\d.]+\s*°C)',
-        "emissivity":     r'Emissivity\s*:\s*([\d.]+)',
-        "reflected_temp": r'Reflected temperature\s*:\s*([\d.]+\s*°C)',
-        "date":           r'(\d{2}/\d{2}/\d{2,4})',
-        "device":         r'Device\s*:\s*([^\n]+?)(?:Serial|$)',
-        "serial_number":  r'Serial Number\s*:\s*([^\n]+)'
-    }
-
-    extraction_count = 0
-    for key, pattern in patterns.items():
+    for xref in range(1, doc.xref_length()):
         try:
-            # FIX 4: Use non-greedy matching and better error handling
-            match = re.search(pattern, page_text, re.IGNORECASE | re.DOTALL)
-            if match:
-                value = match.group(1).strip()
-                # Clean up garbled characters
-                value = ''.join(c for c in value if ord(c) > 31 or c in '\n\t')
-                if value:
-                    reading[key] = value
-                    extraction_count += 1
-        except Exception as e:
-            print(f"[WARNING] Could not extract {key} from p{page_num}: {e}")
-    
-    # FIX 4: Mark quality based on extraction success
-    if extraction_count == 0:
-        reading["data_quality"] = "images_only"  # Images available but no numeric data
-    elif extraction_count < 4:
-        reading["data_quality"] = "partial"
-    else:
-        reading["data_quality"] = "complete"
+            base = doc.extract_image(xref)
+            if not base:
+                continue
+            ext = base["ext"]
+            if ext not in ("jpeg", "jpg"):
+                continue
+            pil = Image.open(io.BytesIO(base["image"]))
+            w, h = pil.size
+            if w < 1000 or h < 800:
+                continue  # skip small icons / UI elements
 
-    return reading
+            # Classify by height: 810 = thermal, 812 = visual
+            if h == 810:
+                thermal_xrefs.append((xref, base["image"], ext))
+            elif h == 812:
+                visual_xrefs.append((xref, base["image"], ext))
+            else:
+                # Fallback: collect any other large JPEG in order
+                thermal_xrefs.append((xref, base["image"], ext))
+        except Exception:
+            continue
+
+    # Sort both lists by xref so they remain in document order
+    thermal_xrefs.sort(key=lambda x: x[0])
+    visual_xrefs.sort(key=lambda x: x[0])
+
+    print(f"  [ThermalParser] Found {len(thermal_xrefs)} thermal + {len(visual_xrefs)} visual images globally")
+
+    # ── Step 3: Save pairs in order ────────────────────────────────────────────
+    n_pairs = max(len(thermal_xrefs), len(visual_xrefs))
+
+    for idx in range(n_pairs):
+        pair_num = idx + 1  # 1-based
+
+        # Save thermal image
+        if idx < len(thermal_xrefs):
+            xref, img_bytes, ext = thermal_xrefs[idx]
+            filename = f"thermal_pair{pair_num:02d}_thermal.{ext}"
+            path = os.path.join(image_out, filename)
+            with open(path, "wb") as f:
+                f.write(img_bytes)
+            result["images"].append({
+                "pair_num":    pair_num,
+                "image_index": 1,
+                "type":        "thermal",
+                "path":        path,
+                "filename":    filename,
+                "xref":        xref
+            })
+            print(f"  [ThermalParser] Pair {pair_num} thermal  -> {filename} (xref={xref})")
+
+        # Save visual image
+        if idx < len(visual_xrefs):
+            xref, img_bytes, ext = visual_xrefs[idx]
+            filename = f"thermal_pair{pair_num:02d}_visual.{ext}"
+            path = os.path.join(image_out, filename)
+            with open(path, "wb") as f:
+                f.write(img_bytes)
+            result["images"].append({
+                "pair_num":    pair_num,
+                "image_index": 2,
+                "type":        "visual",
+                "path":        path,
+                "filename":    filename,
+                "xref":        xref
+            })
+            print(f"  [ThermalParser] Pair {pair_num} visual   -> {filename} (xref={xref})")
+
+    doc.close()
+    print(f"  [ThermalParser] Total images saved: {len(result['images'])} ({n_pairs} pairs)")
+    return result

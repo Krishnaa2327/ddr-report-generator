@@ -50,6 +50,12 @@ def parse_inspection_pdf(pdf_path: str, image_out: str = "outputs/extracted_imag
                 image_bytes = base_image["image"]
                 image_ext = base_image["ext"]
                 
+                # Skip PNG images — these are logos/UI elements in the inspection PDF
+                # Actual inspection photos are always JPEG
+                if image_ext.lower() in ("png", "gif", "bmp", "tiff"):
+                    print(f"  [SKIP] Non-JPEG ({image_ext}) on p{page_num+1} (likely logo)")
+                    continue
+
                 # FIX 1: Filter out small images (icons, UI elements)
                 # Get image dimensions
                 try:
@@ -57,10 +63,11 @@ def parse_inspection_pdf(pdf_path: str, image_out: str = "outputs/extracted_imag
                     width, height = img_pil.size
                 except Exception:
                     width, height = 0, 0
-                
-                # Skip images smaller than 200x200 (UI elements, icons, etc.)
-                if width < 200 or height < 200:
-                    print(f"  [SKIP] Small image {width}x{height} on p{page_num+1} (likely UI element)")
+
+                # Skip images smaller than 350x350 — real inspection photos are ≥370px
+                # The JPEG logo on p9 is only 285×214, so this filters it cleanly
+                if width < 350 or height < 350:
+                    print(f"  [SKIP] Small image {width}x{height} on p{page_num+1} (too small — logo/icon)")
                     continue
                 
                 size = width * height

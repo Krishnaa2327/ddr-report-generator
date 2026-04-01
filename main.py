@@ -4,12 +4,12 @@ main.py
 Entry point for the DDR Report Generation Pipeline.
 
 Flow:
-  1. Parse Inspection PDF  → raw text + images
-  2. Parse Thermal PDF     → raw text + images
+  1. Parse Inspection PDF  -> raw text + images
+  2. Parse Thermal PDF     -> raw text + images
   3. Extract structured JSON from both (LLM)
-  4. Merge both JSONs      → combined area data (handle conflicts/duplicates)
-  5. Reasoning layer       → root cause, severity, actions (LLM)
-  6. Final DDR generation  → client-ready report (LLM)
+  4. Merge both JSONs      -> combined area data (handle conflicts/duplicates)
+  5. Reasoning layer       -> root cause, severity, actions (LLM)
+  6. Final DDR generation  -> client-ready report (LLM)
   7. Build HTML/PDF output with embedded images
 """
 
@@ -125,11 +125,11 @@ def run_pipeline():
     # ────────────────────────────────────────────────────────────
     print("\n[Step 3/7] Extracting structured observations via LLM...")
 
-    print("  → Extracting from inspection report...")
+    print("  -> Extracting from inspection report...")
     inspection_structured = extract_inspection_data(inspection_raw["full_text"])
     save_json(inspection_structured, "step3a_inspection_structured.json")
 
-    print("  → Extracting from thermal report...")
+    print("  -> Extracting from thermal report...")
     thermal_structured = extract_thermal_data(thermal_raw["full_text"])
     save_json(thermal_structured, "step3b_thermal_structured.json")
 

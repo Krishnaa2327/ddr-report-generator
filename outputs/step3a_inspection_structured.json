@@ -1,0 +1,93 @@
+[
+  {
+    "area": "Hall",
+    "issue_description": "Skirting level Dampness",
+    "side": "negative",
+    "severity_hint": "Not Available",
+    "point_no": "1"
+  },
+  {
+    "area": "Common Bathroom",
+    "issue_description": "tile hollowness",
+    "side": "positive",
+    "severity_hint": "Not Available",
+    "point_no": "1.1"
+  },
+  {
+    "area": "Bedroom",
+    "issue_description": "Skirting level Dampness",
+    "side": "negative",
+    "severity_hint": "Not Available",
+    "point_no": "2"
+  },
+  {
+    "area": "Master Bedroom",
+    "issue_description": "Skirting level Dampness",
+    "side": "negative",
+    "severity_hint": "Not Available",
+    "point_no": "3"
+  },
+  {
+    "area": "Master Bedroom Bathroom",
+    "issue_description": "tile hollowness",
+    "side": "positive",
+    "severity_hint": "Not Available",
+    "point_no": "3.1"
+  },
+  {
+    "area": "Kitchen",
+    "issue_description": "Skirting level Dampness",
+    "side": "negative",
+    "severity_hint": "Not Available",
+    "point_no": "4"
+  },
+  {
+    "area": "Master Bedroom Bathroom",
+    "issue_description": "gaps between the tile joints",
+    "side": "positive",
+    "severity_hint": "Not Available",
+    "point_no": "4.1"
+  },
+  {
+    "area": "Master Bedroom",
+    "issue_description": "wall dampness",
+    "side": "negative",
+    "severity_hint": "Not Available",
+    "point_no": "5"
+  },
+  {
+    "area": "External Wall",
+    "issue_description": "cracks",
+    "side": "positive",
+    "severity_hint": "Not Available",
+    "point_no": "5.1"
+  },
+  {
+    "area": "Parking Area",
+    "issue_description": "seepage",
+    "side": "negative",
+    "severity_hint": "Not Available",
+    "point_no": "6"
+  },
+  {
+    "area": "Common Bathroom",
+    "issue_description": "plumbing issue & gaps between the tile joints",
+    "side": "positive",
+    "severity_hint": "Not Available",
+    "point_no": "6.1"
+  },
+  {
+    "area": "Common Bathroom",
+    "issue_description": "Ceiling Dampness",
+    "side": "negative",
+    "severity_hint": "Mild",
+    "point_no": "7"
+  },
+  {
+    "area": "Common Bathroom",
+    "issue_description": "gap between tile joints",
+    "side": "positive",
+    "severity_hint": "Not Available",
+    "point_no": "7.1"
+  }
+]

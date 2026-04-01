@@ -1,0 +1,121 @@
+{
+  "Hall": [
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p3_img2.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 3"
+    },
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p3_img3.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 3"
+    },
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p4_img2.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 4"
+    }
+  ],
+  "Common Bathroom": [
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p5_img2.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 5"
+    },
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p5_img3.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 5"
+    },
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p6_img3.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 6"
+    }
+  ],
+  "Bedroom": [
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p11_img2.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 11"
+    },
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p11_img3.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 11"
+    },
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p12_img2.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 12"
+    }
+  ],
+  "Kitchen": [
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p13_img2.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 13"
+    },
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p13_img3.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 13"
+    },
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p14_img2.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 14"
+    }
+  ],
+  "External Wall": [
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p17_img2.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 17"
+    },
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p17_img3.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 17"
+    },
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p18_img2.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 18"
+    }
+  ],
+  "Parking Area": [
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p21_img2.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 21"
+    },
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p21_img3.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 21"
+    },
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\inspection\\inspection_p22_img2.jpeg",
+      "type": "inspection",
+      "caption": "Inspection photo — Page 22"
+    }
+  ],
+  "Property - General": [
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\thermal\\thermal_pair01_thermal.jpeg",
+      "type": "thermal",
+      "caption": "Thermal image — Hotspot:  Coldspot:  Page 0"
+    },
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\thermal\\thermal_pair02_thermal.jpeg",
+      "type": "thermal",
+      "caption": "Thermal image — Hotspot:  Coldspot:  Page 0"
+    },
+    {
+      "path": "C:\\Users\\Dell\\ddr-report-generator\\outputs\\extracted_images\\thermal\\thermal_pair01_visual.jpeg",
+      "type": "visual",
+      "caption": "Visual reference — Page 0"
+    }
+  ]
+}
