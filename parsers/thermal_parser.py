@@ -6,6 +6,7 @@ from pathlib import Path
 from PIL import Image
 import numpy as np
 import io
+import hashlib
 
 
 def parse_thermal_pdf(pdf_path: str, image_out: str = "outputs/extracted_images/thermal") -> dict:
@@ -14,8 +15,8 @@ def parse_thermal_pdf(pdf_path: str, image_out: str = "outputs/extracted_images/
     Returns dict with keys: full_text, page_count, images, pages, readings
     
     FIX 1: Filter out small images (UI elements, icons)
-    FIX 2: Detect thermal vs visual images by color analysis, not index
-    FIX 3: Keep only top 2 images per page
+    FIX 2: Detect & skip duplicate images using MD5 hashing
+    FIX 3: Keep only unique, meaningful images
     """
     Path(image_out).mkdir(parents=True, exist_ok=True)
 
@@ -40,8 +41,9 @@ def parse_thermal_pdf(pdf_path: str, image_out: str = "outputs/extracted_images/
             "text":     page_text
         })
 
-        # Extract images — FIX 1 & 3: Filter by size, keep top 2 largest
+        # Extract images — FIX 1 & 2 & 3: Filter by size, track hashes for deduplication
         image_list = page.get_images(full=True)
+        page_image_hashes = set()  # Track hashes we've seen on this page
         page_images_filtered = []
         
         for img_index, img in enumerate(image_list):
@@ -60,8 +62,16 @@ def parse_thermal_pdf(pdf_path: str, image_out: str = "outputs/extracted_images/
                 
                 # Skip images smaller than 200x200
                 if width < 200 or height < 200:
-                    print(f"  [SKIP] Small image {width}x{height} on p{page_num+1} (likely UI element)")
+                    print(f"  [SKIP] Small image {width}x{height} on p{page_num+1} (UI element)")
                     continue
+                
+                # FIX 2: Skip duplicate images on same page (using hash)
+                img_hash = hashlib.md5(image_bytes).hexdigest()
+                if img_hash in page_image_hashes:
+                    print(f"  [SKIP] Duplicate image {width}x{height} on p{page_num+1} (hash={img_hash[:6]})")
+                    continue
+                
+                page_image_hashes.add(img_hash)
                 
                 size = width * height
                 page_images_filtered.append({
@@ -71,12 +81,13 @@ def parse_thermal_pdf(pdf_path: str, image_out: str = "outputs/extracted_images/
                     "width": width,
                     "height": height,
                     "size": size,
-                    "index": img_index
+                    "index": img_index,
+                    "hash": img_hash
                 })
             except Exception as e:
                 print(f"[WARNING] Could not process image p{page_num+1} img{img_index}: {e}")
         
-        # FIX 3: Keep only top 2 largest images per page
+        # FIX 3: Keep only top 2 largest unique images per page  
         page_images_filtered = sorted(page_images_filtered, key=lambda x: x["size"], reverse=True)[:2]
         
         page_image_paths = []
@@ -85,8 +96,8 @@ def parse_thermal_pdf(pdf_path: str, image_out: str = "outputs/extracted_images/
                 image_bytes = img_data["bytes"]
                 image_ext = img_data["ext"]
                 
-                # FIX 2: Detect thermal vs visual by color analysis, not index
-                img_type = _detect_image_type(image_bytes)
+                # FIX 2: Since PDFs have duplicate/similar images, use position to differentiate
+                img_type = "thermal" if len(page_image_paths) == 0 else "visual"
                 
                 image_filename = f"thermal_p{page_num + 1}_{img_type}.{image_ext}"
                 image_path  = os.path.join(image_out, image_filename)
@@ -101,7 +112,8 @@ def parse_thermal_pdf(pdf_path: str, image_out: str = "outputs/extracted_images/
                     "path":        image_path,
                     "filename":    image_filename,
                     "width":       img_data["width"],
-                    "height":      img_data["height"]
+                    "height":      img_data["height"],
+                    "hash":        img_data["hash"][:8]  # Store hash for debugging
                 })
                 page_image_paths.append((img_type, image_path))
 
@@ -126,30 +138,6 @@ def parse_thermal_pdf(pdf_path: str, image_out: str = "outputs/extracted_images/
     doc.close()
 
     return result
-
-
-def _detect_image_type(image_bytes: bytes) -> str:
-    """
-    FIX 2: Detect if image is thermal or visual based on color characteristics.
-    Thermal images typically have strong red/warm tones (high red, low blue).
-    """
-    try:
-        img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        arr = np.array(img)
-        
-        red_mean  = arr[:, :, 0].mean()
-        green_mean = arr[:, :, 1].mean()
-        blue_mean = arr[:, :, 2].mean()
-        
-        # Thermal images have higher red channel, lower blue channel
-        # Typical pattern: red > 120, blue < 100
-        if red_mean > 120 or (red_mean > blue_mean + 20 and red_mean > green_mean):
-            return "thermal"
-        else:
-            return "visual"
-    except Exception as e:
-        print(f"[WARNING] Could not analyze image colors: {e}")
-        return "visual"  # Default to visual if detection fails
 
 
 def _parse_thermal_reading(page_text: str, page_num: int) -> dict | None:
