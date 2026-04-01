@@ -15,17 +15,24 @@ Area Data:
 
 Write a professional observation entry including:
 - What was observed (inspection + thermal combined)
-- Temperature data if available
+- Temperature data if available (mark as "estimated from thermal images" if images_only)
 - Conflict note if exists
 - Root cause in simple language
 - Severity: [HIGH] / [MEDIUM] / [LOW]
 - Recommended actions as numbered list
 - Urgency note
 
+CRITICAL - FIX 6: If data_quality is "images_only" or "partial":
+- Say "Visual inspection suggests..." instead of "confirmed"
+- Use language like "appears to show" instead of "shows"
+- Add disclaimer: "Thermal images captured but numeric data not extractable from report"
+- Do NOT state temperatures as facts unless data_quality is "complete"
+
 Rules:
 - Simple client-friendly language
 - Do NOT add information not in the data
 - If field is "Not Available", skip it gracefully
+- Be honest about data limitations
 
 Return only the formatted text. No JSON.
 """

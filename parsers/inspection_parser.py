@@ -3,6 +3,9 @@ import os
 import re
 import json
 from pathlib import Path
+from PIL import Image
+import numpy as np
+import io
 
 
 def parse_inspection_pdf(pdf_path: str, image_out: str = "outputs/extracted_images/inspection") -> dict:
@@ -36,15 +39,51 @@ def parse_inspection_pdf(pdf_path: str, image_out: str = "outputs/extracted_imag
             "text": page_text
         })
 
-        # Extract images
+        # Extract images — FIX 1 & 3: Filter by size, keep top 2 largest
         image_list = page.get_images(full=True)
+        page_images_filtered = []
+        
         for img_index, img in enumerate(image_list):
             xref = img[0]
             try:
                 base_image = doc.extract_image(xref)
                 image_bytes = base_image["image"]
                 image_ext = base_image["ext"]
-                image_filename = f"inspection_p{page_num + 1}_img{img_index + 1}.{image_ext}"
+                
+                # FIX 1: Filter out small images (icons, UI elements)
+                # Get image dimensions
+                try:
+                    img_pil = Image.open(io.BytesIO(image_bytes))
+                    width, height = img_pil.size
+                except Exception:
+                    width, height = 0, 0
+                
+                # Skip images smaller than 200x200 (UI elements, icons, etc.)
+                if width < 200 or height < 200:
+                    print(f"  [SKIP] Small image {width}x{height} on p{page_num+1} (likely UI element)")
+                    continue
+                
+                size = width * height
+                page_images_filtered.append({
+                    "xref": xref,
+                    "bytes": image_bytes,
+                    "ext": image_ext,
+                    "width": width,
+                    "height": height,
+                    "size": size,
+                    "index": img_index
+                })
+            except Exception as e:
+                print(f"[WARNING] Could not process image p{page_num+1} img{img_index}: {e}")
+        
+        # FIX 3: Keep only top 2 largest images per page
+        page_images_filtered = sorted(page_images_filtered, key=lambda x: x["size"], reverse=True)[:2]
+        
+        for img_data in page_images_filtered:
+            try:
+                image_bytes = img_data["bytes"]
+                image_ext = img_data["ext"]
+                image_filename = f"inspection_p{page_num + 1}_img{img_data['index'] + 1}.{image_ext}"
                 image_path = os.path.join(image_out, image_filename)
 
                 with open(image_path, "wb") as img_file:
@@ -52,13 +91,15 @@ def parse_inspection_pdf(pdf_path: str, image_out: str = "outputs/extracted_imag
 
                 result["images"].append({
                     "page_num": page_num + 1,
-                    "image_index": img_index + 1,
+                    "image_index": img_data['index'] + 1,
                     "path": image_path,
                     "filename": image_filename,
-                    "type": "inspection"
+                    "type": "inspection",
+                    "width": img_data["width"],
+                    "height": img_data["height"]
                 })
             except Exception as e:
-                print(f"[WARNING] Could not extract image p{page_num+1} img{img_index}: {e}")
+                print(f"[ERROR] Failed to save image p{page_num+1}: {e}")
 
     result["full_text"] = full_text
     result["page_count"] = len(doc)

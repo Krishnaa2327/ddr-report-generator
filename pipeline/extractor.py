@@ -33,6 +33,10 @@ You are an AI system extracting thermal inspection data.
 From the text below, extract ALL thermal readings.
 Return ONLY valid JSON array. No explanation, no markdown, no code blocks.
 
+IMPORTANT: If text appears garbled or contains many non-ASCII characters (common in PDF extraction),
+return a minimal valid structure with data_quality: "images_only"
+This indicates thermal images are available but numeric data could not be extracted.
+
 Each item must include:
 - area (string): location if identifiable, else "Not Available"
 - image_id (string): thermal image filename e.g. "RB02380X.JPG", else "Not Available"
@@ -42,9 +46,11 @@ Each item must include:
 - reflected_temp (string): e.g. "23 °C", else "Not Available"
 - thermal_issue (string): inferred issue e.g. "moisture/dampness detected", else "Not Available"
 - date (string): inspection date if available, else "Not Available"
+- data_quality (string): "complete", "partial", or "images_only"
 
 Rules:
 - Do NOT guess missing values
+- If text is unreadable, mark data_quality as "images_only"
 - Coldspot significantly below ambient = moisture/dampness
 
 Text:
@@ -95,10 +101,20 @@ def extract_thermal_data(full_text: str) -> list:
     """
     Called by main.py with thermal full_text string.
     Returns list of structured thermal reading dicts.
+    
+    FIX 5: Handle broken/garbled text extraction gracefully.
+    If extraction fails or yields emptiness, return minimal structure
+    so thermal images can still be used as evidence in pipeline.
     """
     print("  [Extractor] Processing thermal text...")
     all_thermal = []
     chunks = _chunk_text(full_text, max_chars=8000)
+    
+    # FIX 5: Check if text looks corrupted
+    non_ascii_ratio = sum(1 for c in full_text if ord(c) > 127) / (len(full_text) + 1)
+    if non_ascii_ratio > 0.3:  # >30% non-ASCII = likely corrupted
+        print(f"  [WARNING] Thermal text appears corrupted ({non_ascii_ratio*100:.1f}% non-ASCII)")
+        print("  [INFO] Will use images as primary evidence")
 
     for i, chunk in enumerate(chunks):
         print(f"  [Extractor] Thermal chunk {i+1}/{len(chunks)}...")
@@ -125,7 +141,22 @@ def extract_thermal_data(full_text: str) -> list:
         except Exception as e:
             print(f"  [ERROR] Thermal chunk {i+1} failed: {e}")
 
-    print(f"  [Extractor] {len(all_thermal)} thermal readings extracted")
+    # FIX 5: If no thermal data extracted but we have text, return fallback structure
+    if len(all_thermal) == 0 and len(chunks) > 0:
+        print("  [INFO] No thermal numeric data extracted (may be corrupted). Using images-only mode.")
+        all_thermal = [{
+            "area": "Not Available",
+            "image_id": "Not Available",
+            "hotspot": "Not Available",
+            "coldspot": "Not Available",
+            "emissivity": "Not Available",
+            "reflected_temp": "Not Available",
+            "thermal_issue": "Thermal images available but numeric data not extractable from text",
+            "date": "Not Available",
+            "data_quality": "images_only"
+        }]
+
+    print(f"  [Extractor] {len(all_thermal)} thermal readings extracted (quality: mixed)")
     return all_thermal
 
 
